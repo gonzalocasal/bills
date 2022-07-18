@@ -1,7 +1,7 @@
 package com.bills.service;
 
-import com.bills.model.BrubankTransaction;
 import com.bills.model.Transaction;
+import com.bills.model.TransactionFactory;
 import com.bills.util.TextExtractor;
 import org.tinylog.Logger;
 import software.amazon.awssdk.core.ResponseInputStream;
@@ -35,7 +35,7 @@ public class TransactionService {
 
     public Optional<Transaction> generateTransaction(ResponseInputStream<GetObjectResponse> s3object) {
         List<String> imageText = textExtractor.getImageText(s3object);
-        BrubankTransaction transaction = new BrubankTransaction(imageText);
+        Transaction transaction = TransactionFactory.getTransaction(imageText);
         if (isValidTransaction(transaction)) {
             return Optional.of(transaction);
         } else {
@@ -66,8 +66,11 @@ public class TransactionService {
     }
 
     private boolean isValidTransaction(Transaction transaction) {
-        return transaction.getName() != null && transaction.getDate() != null &&
-                transaction.getAmount() != null && transaction.getCuit() != null;
+        return transaction != null &&
+                transaction.getName() != null &&
+                transaction.getDate() != null &&
+                transaction.getAmount() != null &&
+                transaction.getCuit() != null;
     }
 
 }
