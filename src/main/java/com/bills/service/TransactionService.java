@@ -20,9 +20,11 @@ import static com.bills.util.Constants.MAXIMUM_BILLABLE;
 public class TransactionService {
 
     private final TextExtractor textExtractor;
+    private final BigDecimal maximumBillable;
 
     public TransactionService() {
         this.textExtractor = new TextExtractor();
+        this.maximumBillable = new BigDecimal(Integer.parseInt(System.getenv(MAXIMUM_BILLABLE)));
     }
 
     public List<Transaction> parseTransactions(List<ResponseInputStream<GetObjectResponse>> filesDownloaded) {
@@ -47,7 +49,7 @@ public class TransactionService {
 
     public List<Transaction> ensureTotalBillable(List<Transaction> transactions) {
         BigDecimal total = transactions.stream().map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
-        if (MAXIMUM_BILLABLE.compareTo(total) < 0) {
+        if (maximumBillable.compareTo(total) < 0) {
             Logger.error("Total Amount of Transaction: {} is higher than the limit of: {}", total, MAXIMUM_BILLABLE);
             transactions.sort(Comparator.comparing(Transaction::getAmount).reversed());
             return removeToEnsureBillableAmount(transactions, total);
@@ -56,7 +58,7 @@ public class TransactionService {
     }
 
     private List<Transaction> removeToEnsureBillableAmount(List<Transaction> transactions, BigDecimal total) {
-        while (MAXIMUM_BILLABLE.compareTo(total) < 0) {
+        while (maximumBillable.compareTo(total) < 0) {
             Transaction transaction = transactions.get(0);
             total = total.subtract(transaction.getAmount());
             transactions.remove(0);

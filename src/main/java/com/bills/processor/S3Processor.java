@@ -24,15 +24,18 @@ import java.util.List;
 import static com.bills.util.Constants.AWS_S3_BILLS_BUCKET;
 import static com.bills.util.Constants.DATE_FORMAT_FOLDER;
 import static com.bills.util.Constants.EXTENSION_CSV;
+import static com.bills.util.Constants.PERIOD;
 
 public class S3Processor {
 
     private final S3Client s3Client;
     private final TransactionService transactionService;
+    private final String period;
 
     public S3Processor() {
-        s3Client = S3ClientProvider.getS3Client();
-        transactionService = new TransactionService();
+        this.s3Client = S3ClientProvider.getS3Client();
+        this.transactionService = new TransactionService();
+        this.period = System.getenv(PERIOD) != null ? System.getenv(PERIOD) : LocalDate.now().format(DateTimeFormatter.ofPattern(DATE_FORMAT_FOLDER));
     }
 
     public List<Transaction> processTransactions() {
@@ -41,7 +44,7 @@ public class S3Processor {
         transactions = transactionService.ensureTotalBillable(transactions);
 
         String csvStringLines = new CSVGenerator().generateCSVStringLines(transactions);
-        String csvFileName = LocalDate.now().format(DateTimeFormatter.ofPattern(DATE_FORMAT_FOLDER)) + EXTENSION_CSV;
+        String csvFileName = period + EXTENSION_CSV;
         uploadResult(s3Client, csvStringLines, csvFileName);
         return transactions;
     }
