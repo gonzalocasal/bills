@@ -23,8 +23,9 @@ public class TransactionService {
     private final BigDecimal maximumBillable;
 
     public TransactionService() {
+        String maximumBillableEnv = System.getenv(MAXIMUM_BILLABLE);
+        this.maximumBillable = maximumBillableEnv != null ? new BigDecimal(Integer.parseInt(maximumBillableEnv)) : null;
         this.textExtractor = new TextExtractor();
-        this.maximumBillable = new BigDecimal(Integer.parseInt(System.getenv(MAXIMUM_BILLABLE)));
     }
 
     public List<Transaction> parseTransactions(List<ResponseInputStream<GetObjectResponse>> filesDownloaded) {
@@ -48,9 +49,12 @@ public class TransactionService {
     }
 
     public List<Transaction> ensureTotalBillable(List<Transaction> transactions) {
+        if (maximumBillable == null) {
+            return transactions;
+        }
         BigDecimal total = transactions.stream().map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
         if (maximumBillable.compareTo(total) < 0) {
-            Logger.error("Total Amount of Transaction: {} is higher than the limit of: {}", total, MAXIMUM_BILLABLE);
+            Logger.error("Total Amount of Transaction: {} is higher than the limit of: {}", total, maximumBillable);
             transactions.sort(Comparator.comparing(Transaction::getAmount).reversed());
             return removeToEnsureBillableAmount(transactions, total);
         }
