@@ -11,7 +11,6 @@ public abstract class Constants {
     public static final String DATE_FORMAT_TRANSACTION = "dd/MM/yyyy";
     public static final String MAXIMUM_BILLABLE = "MAXIMUM_BILLABLE";
     public static final String PERIOD = "PERIOD";
-    public static final String SANTANDER_TRANSACTION_ID_TEXT = "Suc. Origen";
     public static final int PAGE_SEGMENTATION_MODE = 4;
 
 }

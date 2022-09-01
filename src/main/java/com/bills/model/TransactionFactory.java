@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.bills.util.Constants.DATE_FORMAT_TRANSACTION;
-import static com.bills.util.Constants.SANTANDER_TRANSACTION_ID_TEXT;
 
 public class TransactionFactory {
 
@@ -21,11 +20,7 @@ public class TransactionFactory {
         if (lines.isEmpty()) {
             return null;
         }
-        if (lines.stream().anyMatch(l -> l.contains(SANTANDER_TRANSACTION_ID_TEXT))) {
-            return new SantanderTransaction(lines);
-        } else {
-            return new BrubankTransaction(lines);
-        }
+        return new BrubankTransaction(lines);
     }
 
     public static String parseName(String name) {
@@ -40,7 +35,10 @@ public class TransactionFactory {
 
     public static Date parseDate(String dateStr) {
         try {
-            return new SimpleDateFormat(DATE_FORMAT_TRANSACTION).parse(dateStr);
+            String[] split = dateStr.split(" - ")[0].replace("de", "").split("\\s+");
+            String month = String.valueOf(monthNameToNumber(split[1]));
+            String date = String.format("%s/%s/%s", split[0], month, split[2]);
+            return new SimpleDateFormat(DATE_FORMAT_TRANSACTION).parse(date);
         } catch (ParseException e) {
             Logger.error("Error parsing {} as date.", dateStr);
             return null;
@@ -71,37 +69,6 @@ public class TransactionFactory {
         String dni = cuitStr.substring(2, cuitStr.length() - 1);
         String lastNum = cuitStr.substring(cuitStr.length() - 1);
         return type + "-" + dni + "-" + lastNum;
-    }
-
-    public static BigDecimal parseAmountSantander(String amountStr) {
-        amountStr = amountStr.replace("Importe ", "");
-        return parseAmount(amountStr);
-    }
-
-    public static String parseCuitSantander(String cuitStr) {
-        String[] split = cuitStr.split("/");
-        cuitStr = split[split.length - 1];
-        return parseCuit(cuitStr);
-    }
-
-    public static Date parseDateSantander(String dateStr) {
-        String[] split = dateStr.replace("Fecha y hora ", "").split("/");
-        String[] dateArray = new String[3];
-        for (int i = 0; i < 3; i++) {
-            dateArray[i] = split[i].substring(0, 2);
-        }
-        dateArray[2] = "20" + dateArray[2];
-        return parseDate(String.join("/", dateArray));
-    }
-
-    public static String parseNameSantander(String name) {
-        return parseName(name.split("/")[0].split(" DE ")[1]);
-    }
-
-    public static Date parseDateBrubank(String dateStr) {
-        String[] split = dateStr.split(" - ")[0].replace("de", "").split("\\s+");
-        String month = String.valueOf(monthNameToNumber(split[1]));
-        return parseDate(String.format("%s/%s/%s", split[0], month, split[2]));
     }
 
     private static Integer monthNameToNumber(String monthName) {
