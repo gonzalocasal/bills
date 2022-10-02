@@ -5,6 +5,7 @@ public abstract class Constants {
     private Constants(){}
 
     public static final String AWS_S3_BILLS_BUCKET = "bills-gc";
+    public static final String BRUBANK_LINES_PIVOT = "Recibiste dinero de";
     public static final String COLUMN_SEPARATOR = ";";
     public static final String EXTENSION_CSV = ".csv";
     public static final String DATE_FORMAT_FOLDER = "yyyy-MM";

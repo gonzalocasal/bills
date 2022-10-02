@@ -3,7 +3,6 @@ package com.bills.model;
 import org.tinylog.Logger;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,7 +38,7 @@ public class TransactionFactory {
             String month = String.valueOf(monthNameToNumber(split[1]));
             String date = String.format("%s/%s/%s", split[0], month, split[2]);
             return new SimpleDateFormat(DATE_FORMAT_TRANSACTION).parse(date);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             Logger.error("Error parsing {} as date.", dateStr);
             return null;
         }
@@ -64,11 +63,17 @@ public class TransactionFactory {
     }
 
     public static String parseCuit(String cuitStr) {
-        cuitStr = cuitStr.replaceAll("\\D","").trim();
-        String type = cuitStr.substring(0, 2);
-        String dni = cuitStr.substring(2, cuitStr.length() - 1);
-        String lastNum = cuitStr.substring(cuitStr.length() - 1);
-        return type + "-" + dni + "-" + lastNum;
+        try {
+            cuitStr = cuitStr.replaceAll("\\D","").trim();
+            String type = cuitStr.substring(0, 2);
+            String dni = cuitStr.substring(2, cuitStr.length() - 1);
+            String lastNum = cuitStr.substring(cuitStr.length() - 1);
+
+            return type + "-" + dni + "-" + lastNum;
+        } catch (Exception e) {
+            Logger.error("Error parsing {} as cuit.", cuitStr);
+        }
+        return null;
     }
 
     private static Integer monthNameToNumber(String monthName) {
@@ -77,7 +82,7 @@ public class TransactionFactory {
             Calendar cal = Calendar.getInstance();
             cal.setTime(date);
             return cal.get(Calendar.MONTH) + 1;
-        } catch (ParseException e) {
+        } catch (Exception e) {
             Logger.error("Error parsing month name: {}", monthName);
             return null;
         }
