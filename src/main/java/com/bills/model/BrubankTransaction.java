@@ -20,6 +20,6 @@ public class BrubankTransaction extends Transaction{
         this.setName(parseName(lines.get(index + 1)));
         this.setDate(parseDate(lines.get(index + 2)));
         this.setAmount(parseAmount(lines.get(index + 3)));
-        this.setCuit(parseCuit(lines.get(lines.size() - 2)));
+        this.setCuit(parseCuit(lines.get(lines.size() - 4)));
     }
 }
